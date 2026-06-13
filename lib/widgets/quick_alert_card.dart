@@ -10,11 +10,11 @@ class QuickAlertCards extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _AlertCard(icon: Icons.masks, label: 'Robbery', type: 'Robbery', color: const Color(0xFFF97316))),
+        Expanded(child: _AlertCard(icon: Icons.security, label: 'Robbery', type: 'Robbery', color: const Color(0xFFF97316))),
         const SizedBox(width: 14),
         Expanded(child: _AlertCard(icon: Icons.local_fire_department, label: 'Fire', type: 'Fire', color: const Color(0xFFEF4444))),
         const SizedBox(width: 14),
-        Expanded(child: _AlertCard(icon: Icons.car_crash, label: 'Accident', type: 'Accident', color: const Color(0xFFF59E0B))),
+        Expanded(child: _AlertCard(icon: Icons.minor_crash, label: 'Accident', type: 'Accident', color: const Color(0xFFF59E0B))),
       ],
     );
   }
@@ -30,23 +30,41 @@ class _AlertCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Provider.of<AppStateProvider>(context, listen: false).sendNewUserAlert(type);
-        _showToast(context, '🚨 $label alert sent! Nearby users & responders notified.');
-      },
+      onTap: () => _handleAlert(context),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+          border: Border.all(color: color.withOpacity(0.15), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            )
+          ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 22, color: color),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 24, color: color),
+            ),
             const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: color.withOpacity(0.9),
+              ),
+            ),
           ],
         ),
       ),
@@ -55,5 +73,10 @@ class _AlertCard extends StatelessWidget {
 
   void _showToast(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 2)));
+  }
+
+  void _handleAlert(BuildContext context) {
+    Provider.of<AppStateProvider>(context, listen: false).sendNewUserAlert(type);
+    _showToast(context, '🚨 $label alert sent! Nearby users & responders notified.');
   }
 }

@@ -82,10 +82,7 @@ class _Home extends State<Home> {
                           ),
                         ),
                         // Bottom Navigation
-                        BottomNavBar(
-                        currentIndex: _currentIndex,
-                        onTap: _onNavItemTapped,
-                      ),
+                        
                     ],
                   ),
                 ),
@@ -108,6 +105,10 @@ class _Home extends State<Home> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onNavItemTapped,
+      ),
     );
   }
 

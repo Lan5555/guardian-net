@@ -5,7 +5,6 @@ import 'package:guardian_net/widgets/community_alert_lists.dart';
 import 'package:guardian_net/widgets/location_share_card.dart';
 import 'package:guardian_net/widgets/panic_button.dart';
 import 'package:guardian_net/widgets/quick_alert_card.dart';
-import 'package:provider/provider.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -84,7 +83,7 @@ class SectionTitle extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: const Color(0xFF2563EB)),
           const SizedBox(width: 8),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF0F172A))),
+          Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0F172A))),
         ],
       ),
     );
@@ -101,7 +100,7 @@ class FeedHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SectionTitle(icon: Icons.people, title: 'Community Alerts'),
+          Expanded(child: SectionTitle(icon: Icons.people, title:  'Community Alerts')),
           VerifiedBadge(),
         ],
       ),

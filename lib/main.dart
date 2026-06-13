@@ -1,6 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:guardian_net/home/layout.dart';
+import 'package:guardian_net/modules/auth/views/login.dart';
 import 'package:guardian_net/providers/app_state_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +30,7 @@ class GuardianNetApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         useMaterial3: true,
       ),
-      home: const Home(),
+      home: const LoginScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
