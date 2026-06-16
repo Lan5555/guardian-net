@@ -1,10 +1,16 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:guardian_net/modules/auth/views/login.dart';
 import 'package:guardian_net/providers/app_state_provider.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+  ));
   runApp(
     ChangeNotifierProvider(
       create: (context) => AppStateProvider(),
@@ -35,4 +41,3 @@ class GuardianNetApp extends StatelessWidget {
     );
   }
 }
-
