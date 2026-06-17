@@ -13,6 +13,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late AuthController _authController;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -26,16 +28,20 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
-        ),
-        backgroundColor: const Color(0xFF0F172A),
-        icon: const Icon(Icons.admin_panel_settings, color: Colors.white),
-        label: const Text(
-          "Admin Portal",
-          style: TextStyle(color: Colors.white),
+      floatingActionButton: SizedBox(
+        height: 44,
+        child: FloatingActionButton.extended(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
+          ),
+          backgroundColor: const Color(0xFF0F172A),
+          elevation: 2,
+          icon: const Icon(Icons.admin_panel_settings, color: Colors.white, size: 18),
+          label: const Text(
+            "Admin Portal",
+            style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
       body: SafeArea(
@@ -69,6 +75,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Secure your community with verified alerts.',
                 style: TextStyle(fontSize: 16, color: Color(0xFF64748B)),
               ),
+              Form(
+                key: _formKey,
+                child: 
+              Column(
+                children: [
               const SizedBox(height: 48),
               _buildTextField(
                 controller: _authController.loginEmailController,
@@ -83,7 +94,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 hint: '••••••••',
                 icon: Icons.lock_outline,
                 isPassword: true,
+            
               ),
+            ])),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
@@ -108,7 +121,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _authController.handleUserLogin,
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _authController.handleUserLogin();
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F172A),
                     shape: RoundedRectangleBorder(
@@ -184,10 +201,25 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
-          obscureText: isPassword,
+          obscureText: isPassword && !_authController.isPasswordVisible,
           decoration: InputDecoration(
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      _authController.isPasswordVisible
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      size: 20,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                    onPressed: () => setState(
+                      () => _authController.isPasswordVisible =
+                          !_authController.isPasswordVisible,
+                    ),
+                  )
+                : null,
             hintText: hint,
             prefixIcon: Icon(icon, size: 20, color: const Color(0xFF94A3B8)),
             filled: true,
@@ -201,6 +233,12 @@ class _LoginScreenState extends State<LoginScreen> {
               borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
           ),
+          validator: (value){
+            if(value == null || value.isEmpty){
+              return 'Please enter your $label';
+            }
+            return null;
+          },
         ),
       ],
     );

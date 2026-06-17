@@ -3,12 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:guardian_net/helpers/helpers.dart';
 import 'package:guardian_net/models/community_model.dart';
+import 'package:guardian_net/models/user_model.dart';
 import 'package:guardian_net/modules/admin/service/admin_service.dart';
 
 class AdminController extends ChangeNotifier {
   final AdminService _adminService = AdminService();
   List<CommunityModel> communities = [];
-  List<dynamic> users = [];
+  List<UserModel> users = [];
   bool isLoading = true;
   int activeTab = 0; // 0: Communities, 1: Users, 2: Alerts
   final BuildContext context;
@@ -25,7 +26,8 @@ class AdminController extends ChangeNotifier {
     notifyListeners();
     final res = await _adminService.fetchAllUsers();
     if (res.success) {
-      users = res.data;
+      final List<dynamic> data = res.data;
+      users = data.map((json) => UserModel.fromJson(json)).toList();
       isLoading = false;
       notifyListeners();
     } else {
@@ -95,4 +97,14 @@ class AdminController extends ChangeNotifier {
       showToast(context, res.message, isError: true);
     }
   }
+
+  Future<void> deleteUser(int id) async {
+    final res = await _adminService.deleteUSer(id);
+    if (res.success) {
+      await fetchUsers();
+      showToast(context, res.message);
+    } else {
+      showToast(context, res.message, isError: true);
+    }
+   }
 }

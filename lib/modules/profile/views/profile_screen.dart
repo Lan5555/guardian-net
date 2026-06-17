@@ -1,150 +1,173 @@
 // lib/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:guardian_net/modules/privacy/views/privacy_screen.dart';
+import 'package:guardian_net/modules/profile/controller/profile_controller.dart';
 import 'package:guardian_net/providers/app_state_provider.dart';
+import 'package:guardian_net/providers/session_provider.dart';
 import 'package:provider/provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late ProfileController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = ProfileController(context: context);
+    controller.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const SectionTitle(
-            icon: Icons.account_circle,
-            title: 'Account Settings',
-          ),
-          const SizedBox(height: 16),
-          const _RfidCard(),
-          const SizedBox(height: 20),
-          Center(
-            child: Column(
-              children: [
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x332563EB),
-                        blurRadius: 20,
-                        offset: Offset(0, 10),
+    return Consumer<SessionProvider>(
+      builder: (context, auth, child) {
+       
+        return Container(
+          color: Colors.white,
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              const SectionTitle(
+                icon: Icons.account_circle,
+                title: 'Account Settings',
+              ),
+              const SizedBox(height: 16),
+              const _RfidCard(),
+              const SizedBox(height: 20),
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x332563EB),
+                            blurRadius: 20,
+                            offset: Offset(0, 10),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'AM',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Alex Morgan',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Color(0xFF0F172A),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Text(
-                  'Verified Resident · Downtown',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          _SettingsTile(
-            onclick: () {
-              
-            },
-            icon: Icons.notifications,
-            label: 'Push Notifications',
-            trailing: const Chip(
-              label: Text('ON', style: TextStyle(fontSize: 10)),
-              backgroundColor: Color(0xFFF0FDF4),
-              labelStyle: TextStyle(color: Color(0xFF22C55E)),
-            ),
-          ),
-          _SettingsTile(
-            onclick: () {
-              
-            },
-            icon: Icons.credit_card,
-            label: 'RFID Identity',
-            trailing: const Chip(
-              label: Text('ACTIVE', style: TextStyle(fontSize: 10)),
-              backgroundColor: Color(0xFFEFF6FF),
-              labelStyle: TextStyle(color: Color(0xFF2563EB)),
-            ),
-          ),
-          _SettingsTile(
-            onclick: () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacySecurityScreen())),
-            icon: Icons.shield,
-            label: 'Privacy & Security',
-            trailing: const Icon(
-              Icons.chevron_right,
-              size: 12,
-              color: Color(0xFFCBD5E1),
-            ),
-          ),
-          const SizedBox(height: 30),
-          Consumer<AppStateProvider>(
-            builder: (context, provider, child) {
-              return GestureDetector(
-                onTap: () {
-                  provider.boostTrustScore();
-                  _showToast(
-                    context,
-                    '✨ Trust score increased by participating in verifications!',
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: const Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.star, color: Colors.white, size: 16),
-                        SizedBox(width: 8),
-                        Text(
-                          'Boost Reputation',
+                      child: const Center(
+                        child: Text(
+                          'AM',
                           style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
+                      ),
                     ),
+                    const SizedBox(height: 12),
+                    Text(
+                      auth.user?.name ?? '',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Color(0xFF0F172A),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Text(
+                      'Verified Resident · Downtown',
+                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              _SettingsTile(
+                onclick: () {},
+                icon: Icons.notifications,
+                label: 'Push Notifications',
+                trailing: const Chip(
+                  label: Text('ON', style: TextStyle(fontSize: 10)),
+                  backgroundColor: Color(0xFFF0FDF4),
+                  labelStyle: TextStyle(color: Color(0xFF22C55E)),
+                ),
+              ),
+              _SettingsTile(
+                onclick: () {},
+                icon: Icons.credit_card,
+                label: 'RFID Identity',
+                trailing: const Chip(
+                  label: Text('ACTIVE', style: TextStyle(fontSize: 10)),
+                  backgroundColor: Color(0xFFEFF6FF),
+                  labelStyle: TextStyle(color: Color(0xFF2563EB)),
+                ),
+              ),
+              _SettingsTile(
+                onclick: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PrivacySecurityScreen(),
                   ),
                 ),
-              );
-            },
+                icon: Icons.shield,
+                label: 'Privacy & Security',
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  size: 12,
+                  color: Color(0xFFCBD5E1),
+                ),
+              ),
+              const SizedBox(height: 30),
+              Consumer<AppStateProvider>(
+                builder: (context, provider, child) {
+                  return GestureDetector(
+                    onTap: () {
+                      provider.boostTrustScore();
+                      _showToast(
+                        context,
+                        '✨ Trust score increased by participating in verifications!',
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.star, color: Colors.white, size: 16),
+                            SizedBox(width: 8),
+                            Text(
+                              'Boost Reputation',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -256,7 +279,11 @@ class _SettingsTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: const Color(0xFFF1F5F9)),
           boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 2)),
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 2,
+              offset: Offset(0, 2),
+            ),
           ],
         ),
         child: Row(
@@ -286,7 +313,10 @@ class _SettingsTile extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             trailing,

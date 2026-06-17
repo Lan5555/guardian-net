@@ -4,6 +4,7 @@ import 'package:guardian_net/modules/home_screen/views/home_screen.dart';
 import 'package:guardian_net/modules/profile/views/profile_screen.dart';
 import 'package:guardian_net/modules/trust/views/trust_screen.dart';
 import 'package:guardian_net/providers/app_state_provider.dart';
+import 'package:guardian_net/providers/session_provider.dart';
 import 'package:guardian_net/widgets/bottom_nav_bar.dart';
 import 'package:guardian_net/widgets/sidebar.dart';
 import 'package:provider/provider.dart';
@@ -128,7 +129,7 @@ class _Home extends State<Home> {
             style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 12),
-          Consumer<AppStateProvider>(
+          Consumer<SessionProvider>(
             builder: (context, provider, child) {
               return Container(
                 padding: const EdgeInsets.all(14),
@@ -159,7 +160,7 @@ class _Home extends State<Home> {
                         const Text('Guardian Reputation', style: TextStyle(fontSize: 10, color: Color(0xFF0369A1), fontWeight: FontWeight.w700)),
                         Row(
                           children: [
-                            Text('${provider.trustScore}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                            Text('${provider.user?.reputationCount}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                             const SizedBox(width: 4),
                             const Text('XP', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
                           ],

@@ -10,7 +10,7 @@ class AdminService extends CoreService {
   }
 
   Future<NetResponse> deleteCommunity(int id) async {
-    return send('/community/delete/$id', null);
+    return delete('/community/delete/$id');
   }
 
   Future<NetResponse> fetchAllUsers() async {
@@ -18,5 +18,8 @@ class AdminService extends CoreService {
   }
   Future<NetResponse> fetchAllCommunities() async {
     return get('/community/find-all');
+  }
+  Future<NetResponse> deleteUSer(int id) async {
+    return delete('/users/delete/$id');
   }
 }

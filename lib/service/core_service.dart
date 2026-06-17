@@ -71,12 +71,11 @@ class CoreService {
     }
   }
 
-  Future<NetResponse> delete(String endpoint, dynamic payload) async {
+  Future<NetResponse> delete(String endpoint) async {
     try {
       final res = await http.delete(
         Uri.parse('$BASE_URL$endpoint'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
         final response = jsonDecode(res.body);

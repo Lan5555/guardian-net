@@ -3,7 +3,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:guardian_net/helpers/helpers.dart';
-import 'package:guardian_net/service/core_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});

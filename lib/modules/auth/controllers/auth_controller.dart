@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:guardian_net/helpers/helpers.dart';
 import 'package:guardian_net/home/layout.dart';
 import 'package:guardian_net/models/community_model.dart';
+import 'package:guardian_net/models/user_model.dart';
 import 'package:guardian_net/modules/admin/views/admin_screen.dart';
 import 'package:guardian_net/modules/auth/services/auth_service.dart';
+import 'package:guardian_net/providers/session_provider.dart';
 import 'package:guardian_net/service/core_service.dart';
+import 'package:provider/provider.dart';
 
 class AuthController extends ChangeNotifier {
   final emailController = TextEditingController();
@@ -23,6 +26,7 @@ class AuthController extends ChangeNotifier {
   CommunityModel? selectedCommunity;
   List<CommunityModel> communities = [];
   bool isLoading = false;
+  UserModel? user;
 
   final AuthService _service = AuthService();
   final BuildContext context;
@@ -73,6 +77,8 @@ class AuthController extends ChangeNotifier {
 
     if (res.success) {
       showToast(context, res.message);
+      user = UserModel.fromJson(res.data);
+      context.read<SessionProvider>().setUser(user);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Home()),
@@ -80,14 +86,18 @@ class AuthController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     } else {
-      showToast(context, res.message, isError: true);
+      showFeedBack(context, res.message, isError: true);
+      if (kDebugMode) {
+        print(res.message);
+      }
+      isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> handleRegister() async {
     isLoading = true;
     notifyListeners();
-
 
     if (registerPasswordController.text != confirmPasswordController.text) {
       showToast(context, 'Passwords do not match', isError: true);
@@ -110,6 +120,10 @@ class AuthController extends ChangeNotifier {
     };
     NetResponse res = await _service.registerUser(payload);
     if (res.success) {
+      user = UserModel.fromJson(res.data);
+
+      context.read<SessionProvider>().setUser(user);
+
       showToast(context, res.message);
       isLoading = false;
       notifyListeners();
