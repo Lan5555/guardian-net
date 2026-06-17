@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:guardian_net/home/layout.dart';
+import 'package:guardian_net/modules/auth/controllers/auth_controller.dart';
+import 'package:guardian_net/modules/auth/views/forgot_password.dart';
 import 'package:guardian_net/modules/auth/views/register.dart';
+import 'package:guardian_net/modules/auth/views/admin_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,20 +12,32 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  late AuthController _authController;
+  @override
+  void initState() {
+    super.initState();
+    _authController = AuthController(context: context);
+    _authController.addListener(() {
+      setState(() {});
+    });
 
-  void _handleLogin() {
-    // Simple navigation for demo purposes
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const Home()),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
+        ),
+        backgroundColor: const Color(0xFF0F172A),
+        icon: const Icon(Icons.admin_panel_settings, color: Colors.white),
+        label: const Text(
+          "Admin Portal",
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -57,14 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 48),
               _buildTextField(
-                controller: _emailController,
+                controller: _authController.loginEmailController,
                 label: 'Email Address',
                 hint: 'alex@example.com',
                 icon: Icons.email_outlined,
               ),
               const SizedBox(height: 20),
               _buildTextField(
-                controller: _passwordController,
+                controller: _authController.loginPasswordController,
                 label: 'Password',
                 hint: '••••••••',
                 icon: Icons.lock_outline,
@@ -74,37 +88,73 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
-                  child: const Text('Forgot Password?',
-                      style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.w600)),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ForgotPasswordScreen(),
+                    ),
+                  ),
+                  child: const Text(
+                    'Forgot Password?',
+                    style: TextStyle(
+                      color: Color(0xFF2563EB),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 22),
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _handleLogin,
+                  onPressed: _authController.handleUserLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F172A),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
-                  child: const Text(
+                  child: _authController.isLoading ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                    ) : const  Text(
                     'Sign In',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account?", style: TextStyle(color: Color(0xFF64748B))),
+                  const Text(
+                    "Don't have an account?",
+                    style: TextStyle(color: Color(0xFF64748B)),
+                  ),
                   TextButton(
-                    onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const RegisterScreen())),
-                    child: const Text('Sign Up',
-                        style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.w700)),
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterScreen(),
+                      ),
+                    ),
+                    child: const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        color: Color(0xFF2563EB),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -125,7 +175,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF0F172A))),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF0F172A),
+          ),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,

@@ -14,10 +14,11 @@ class CoreService {
         body: jsonEncode(payload),
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
+        final response = jsonDecode(res.body);
         return NetResponse(
-          success: true,
-          message: 'Success',
-          data: jsonDecode(res.body),
+          success: response['success'] ?? true,
+          message: response['message'] ?? 'Success',
+          data: response['data']
         );
       } else {
         return NetResponse(success: false, message: res.body, data: null);
@@ -34,10 +35,11 @@ class CoreService {
         headers: {'Content-Type': 'application/json'},
       );
       if (res.statusCode == 200) {
+        final response = jsonDecode(res.body);
         return NetResponse(
-          success: true,
-          message: 'Success',
-          data: jsonDecode(res.body),
+          success: response['success'] ?? true,
+          message: response['message'] ?? 'Success',
+          data: response['data'] ?? response,
         );
       } else {
         return NetResponse(success: false, message: res.body, data: null);
@@ -49,16 +51,17 @@ class CoreService {
 
   Future<NetResponse> update(String endpoint, dynamic payload) async {
     try {
-      final res = await http.put(
+      final res = await http.patch(
         Uri.parse('$BASE_URL$endpoint'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
+        final response = jsonDecode(res.body);
         return NetResponse(
-          success: true,
-          message: 'Success',
-          data: jsonDecode(res.body),
+          success: response['success'] ?? true,
+          message: response['message'] ?? 'Success',
+          data: response['data'] ?? response,
         );
       } else {
         return NetResponse(success: false, message: res.body, data: null);
@@ -76,10 +79,11 @@ class CoreService {
         body: jsonEncode(payload),
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
+        final response = jsonDecode(res.body);
         return NetResponse(
-          success: true,
-          message: 'Success',
-          data: jsonDecode(res.body),
+          success: response['success'] ?? true,
+          message: response['message'] ?? 'Success',
+          data: response['data'] ?? response,
         );
       } else {
         return NetResponse(success: false, message: res.body, data: null);

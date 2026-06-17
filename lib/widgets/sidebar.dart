@@ -1,5 +1,6 @@
 // lib/widgets/sidebar.dart
 import 'package:flutter/material.dart';
+import 'package:guardian_net/modules/auth/views/login.dart';
 
 class Sidebar extends StatelessWidget {
   final bool isOpen;
@@ -25,6 +26,8 @@ class Sidebar extends StatelessWidget {
           _SidebarIcon(icon: Icons.list, index: 1, currentIndex: currentIndex, onTap: () => onItemSelected(1)),
           const SizedBox(height: 25),
           _SidebarIcon(icon: Icons.settings, index: 3, currentIndex: currentIndex, onTap: () => onItemSelected(3)),
+          _SidebarIcon(icon: Icons.logout, index: 4, currentIndex: currentIndex, onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()))),
+
         ],
       ),
     );
