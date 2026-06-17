@@ -15,8 +15,6 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
-  final CoreService _service = CoreService();
-
   Future<void> _handleReset() async {
     if (_emailController.text.isEmpty) {
       showToast(context, "Please enter your email", isError: true);
