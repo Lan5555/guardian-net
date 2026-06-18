@@ -8,7 +8,9 @@ import 'package:guardian_net/models/community_model.dart';
 import 'package:guardian_net/models/user_model.dart';
 import 'package:guardian_net/modules/admin/views/admin_screen.dart';
 import 'package:guardian_net/modules/auth/services/auth_service.dart';
+import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:guardian_net/providers/session_provider.dart';
+import 'package:guardian_net/providers/socket_provider.dart';
 import 'package:guardian_net/service/core_service.dart';
 import 'package:provider/provider.dart';
 
@@ -79,6 +81,7 @@ class AuthController extends ChangeNotifier {
       showToast(context, res.message);
       user = UserModel.fromJson(res.data);
       context.read<SessionProvider>().setUser(user);
+      context.read<SocketProvider>().connect(user!.communityId!, context.read<AlertProvider>());
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Home()),

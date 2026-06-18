@@ -1,7 +1,7 @@
 // lib/widgets/community_alerts_list.dart
 import 'package:flutter/material.dart';
+import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:provider/provider.dart';
-import '../providers/app_state_provider.dart';
 import '../models/alert_model.dart';
 
 class CommunityAlertsList extends StatelessWidget {
@@ -9,8 +9,35 @@ class CommunityAlertsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppStateProvider>(
+    return Consumer<AlertProvider>(
       builder: (context, provider, child) {
+        if (provider.alerts.isEmpty) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFF1F5F9)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF0FDF4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.shield_outlined, size: 32, color: Color(0xFF16A34A)),
+                ),
+                const SizedBox(height: 16),
+                const Text('All Clear', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+                const SizedBox(height: 4),
+                const Text('No active alerts in your community right now.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              ],
+            ),
+          );
+        }
         final alerts = provider.alerts.take(3).toList();
         return Column(
           children: alerts.map((alert) => _AlertItem(alert: alert)).toList(),
@@ -33,7 +60,6 @@ class _AlertItemState extends State<_AlertItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isVerified = widget.alert.verified;
     return GestureDetector(
       onTap: () => setState(() => _expanded = !_expanded),
       child: Container(
@@ -56,17 +82,17 @@ class _AlertItemState extends State<_AlertItem> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: widget.alert.type.contains('PANIC') ? const Color(0xFFFEF2F2) : const Color(0xFFEFF6FF),
+                      color: (widget.alert.subject ?? '').toUpperCase().contains('PANIC') ? const Color(0xFFFEF2F2) : const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Text(widget.alert.type.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: widget.alert.type.contains('PANIC') ? const Color(0xFFEF4444) : const Color(0xFF2563EB))),
+                    child: Text((widget.alert.subject ?? 'ALERT').toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: (widget.alert.subject ?? '').toUpperCase().contains('PANIC') ? const Color(0xFFEF4444) : const Color(0xFF2563EB))),
                   ),
                   if (!_expanded)
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
-                          widget.alert.description,
+                          widget.alert.title ?? 'No Title',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
@@ -88,17 +114,22 @@ class _AlertItemState extends State<_AlertItem> {
               secondChild: Column(
                 children: [
               const SizedBox(height: 10),
-              Align(alignment: Alignment.centerLeft, child: Text(widget.alert.description, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+              Align(alignment: Alignment.centerLeft, child: Text(widget.alert.title ?? 'Emergency Alert', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800))),
+              const SizedBox(height: 4),
+              Align(alignment: Alignment.centerLeft, child: Text(widget.alert.message ?? '', style: const TextStyle(fontSize: 13, color: Color(0xFF475569)))),
               const SizedBox(height: 6),
               Row(
                 children: [
-                  _MetaChip(icon: Icons.location_on, text: widget.alert.location),
-                  const SizedBox(width: 12),
-                  _MetaChip(icon: Icons.access_time, text: widget.alert.timestamp),
+                  _MetaChip(icon: Icons.location_on_outlined, text: widget.alert.location ?? 'Unknown Location'),
+                ],
+              ),
+              Row(
+                children: [
+                  _MetaChip(icon: Icons.person, text: 'Reporter: ${widget.alert.reporter}'),
                 ],
               ),
               const SizedBox(height: 8),
-              if (isVerified)
+              if ((widget.alert.subject ?? '').toUpperCase().contains('PANIC'))
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(10),
@@ -124,7 +155,7 @@ class _AlertItemState extends State<_AlertItem> {
                         color: const Color(0xFF16A34A),
                         backgroundColor: const Color(0xFFF0FDF4),
                         onTap: () {
-                          Provider.of<AppStateProvider>(context, listen: false).verifyCommunityAlert(widget.alert.id);
+                          Provider.of<AlertProvider>(context, listen: false).verifyCommunityAlert(widget.alert.reportedId.toString());
                           _showToast(context, '✅ Alert verified! Responders notified.');
                         },
                       ),
@@ -137,7 +168,7 @@ class _AlertItemState extends State<_AlertItem> {
                         color: const Color(0xFFEF4444),
                         backgroundColor: const Color(0xFFFEE2E2),
                         onTap: () {
-                          Provider.of<AppStateProvider>(context, listen: false).flagAlertAsFalse(widget.alert.id);
+                          Provider.of<AlertProvider>(context, listen: false).flagAlertAsFalse(widget.alert.reportedId.toString());
                           _showToast(context, '⚠️ Alert flagged as false. Trust penalty applied.');
                         },
                       ),

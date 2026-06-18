@@ -14,7 +14,7 @@ class Sidebar extends StatelessWidget {
     if (!isOpen) return const SizedBox.shrink();
     return Container(
       width: 60,
-      color: const Color(0xFFF8FAFC),
+      color: Color.fromARGB(255, 216, 213, 213),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -26,6 +26,7 @@ class Sidebar extends StatelessWidget {
           _SidebarIcon(icon: Icons.list, index: 1, currentIndex: currentIndex, onTap: () => onItemSelected(1)),
           const SizedBox(height: 25),
           _SidebarIcon(icon: Icons.settings, index: 3, currentIndex: currentIndex, onTap: () => onItemSelected(3)),
+          const SizedBox(height: 25),
           _SidebarIcon(icon: Icons.logout, index: 4, currentIndex: currentIndex, onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()))),
 
         ],

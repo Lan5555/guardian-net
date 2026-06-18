@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:guardian_net/modules/privacy/views/privacy_screen.dart';
 import 'package:guardian_net/modules/profile/controller/profile_controller.dart';
-import 'package:guardian_net/providers/app_state_provider.dart';
+import 'package:guardian_net/modules/trust/controller/trust_controller.dart';
 import 'package:guardian_net/providers/session_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -15,13 +15,16 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late ProfileController controller;
+  late TrustController trustController;
+
   @override
   void initState() {
     super.initState();
     controller = ProfileController(context: context);
-    controller.addListener(() {
-      setState(() {});
-    });
+    trustController = TrustController(context: context);
+    controller.addListener(() => setState(() {}));
+    trustController.addListener(() => setState(() {}));
+    trustController.fetchCommunityData();
   }
 
   @override
@@ -39,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: 'Account Settings',
               ),
               const SizedBox(height: 16),
-              const _RfidCard(),
+              _RfidCard(userName: auth.user?.name, communityName: trustController.userCommunity?.name),
               const SizedBox(height: 20),
               Center(
                 child: Column(
@@ -62,10 +65,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ],
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'AM',
-                          style: TextStyle(
+                          (auth.user?.name?.isNotEmpty ?? false) ? auth.user!.name!.substring(0, 2).toUpperCase() : 'GN',
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -76,14 +79,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 12),
                     Text(
                       auth.user?.name ?? '',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                         color: Color(0xFF0F172A),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const Text(
-                      'Verified Resident · Downtown',
+                    Text(
+                      'Verified Resident · ${trustController.userCommunity?.name ?? 'Loading...'}',
                       style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
                     ),
                   ],
@@ -92,22 +95,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 24),
               _SettingsTile(
                 onclick: () {},
-                icon: Icons.notifications,
-                label: 'Push Notifications',
-                trailing: const Chip(
-                  label: Text('ON', style: TextStyle(fontSize: 10)),
-                  backgroundColor: Color(0xFFF0FDF4),
-                  labelStyle: TextStyle(color: Color(0xFF22C55E)),
+                icon: Icons.emergency_share_outlined,
+                label: 'Emergency Contacts',
+                trailing: const Text(
+                  '3 Active',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                 ),
               ),
               _SettingsTile(
                 onclick: () {},
-                icon: Icons.credit_card,
-                label: 'RFID Identity',
-                trailing: const Chip(
-                  label: Text('ACTIVE', style: TextStyle(fontSize: 10)),
-                  backgroundColor: Color(0xFFEFF6FF),
-                  labelStyle: TextStyle(color: Color(0xFF2563EB)),
+                icon: Icons.history_toggle_off_rounded,
+                label: 'Alert History',
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  size: 12,
+                  color: Color(0xFFCBD5E1),
                 ),
               ),
               _SettingsTile(
@@ -126,43 +128,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-              Consumer<AppStateProvider>(
-                builder: (context, provider, child) {
-                  return GestureDetector(
-                    onTap: () {
-                      provider.boostTrustScore();
-                      _showToast(
-                        context,
-                        '✨ Trust score increased by participating in verifications!',
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                        ),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: const Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.star, color: Colors.white, size: 16),
-                            SizedBox(width: 8),
-                            Text(
-                              'Boost Reputation',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+              GestureDetector(
+                onTap: () {
+                  _showToast(
+                    context,
+                    '🔒 Security protocols are up to date.',
                   );
                 },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0F172A), Color(0xFF334155)],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.verified_user_outlined, color: Colors.white, size: 16),
+                        SizedBox(width: 8),
+                        Text(
+                          'System Security Audit',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -204,7 +201,10 @@ class SectionTitle extends StatelessWidget {
 }
 
 class _RfidCard extends StatelessWidget {
-  const _RfidCard();
+  final String? userName;
+  final String? communityName;
+
+  const _RfidCard({this.userName, this.communityName});
 
   @override
   Widget build(BuildContext context) {
@@ -243,9 +243,9 @@ class _RfidCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Linked to: Alex Morgan · Downtown Precinct',
-                style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+              Text(
+                'Linked to: ${userName ?? 'User'} · ${communityName ?? 'Precinct'}',
+                style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
               ),
             ],
           ),
@@ -292,19 +292,19 @@ class _SettingsTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: label == 'Push Notifications'
+                color: label == 'Emergency Contacts'
                     ? const Color(0xFFEFF6FF)
-                    : (label == 'RFID Identity'
-                          ? const Color(0xFFFEF2F2)
+                    : (label == 'Alert History'
+                          ? const Color(0xFFF0FDF4)
                           : const Color(0xFFF8FAFC)),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
                 size: 16,
-                color: label == 'Push Notifications'
+                color: label == 'Emergency Contacts'
                     ? const Color(0xFF2563EB)
-                    : (label == 'RFID Identity'
+                    : (label == 'Alert History'
                           ? const Color(0xFFEF4444)
                           : const Color(0xFF64748B)),
               ),

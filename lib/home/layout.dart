@@ -3,7 +3,6 @@ import 'package:guardian_net/modules/history/views/history_screen.dart';
 import 'package:guardian_net/modules/home_screen/views/home_screen.dart';
 import 'package:guardian_net/modules/profile/views/profile_screen.dart';
 import 'package:guardian_net/modules/trust/views/trust_screen.dart';
-import 'package:guardian_net/providers/app_state_provider.dart';
 import 'package:guardian_net/providers/session_provider.dart';
 import 'package:guardian_net/widgets/bottom_nav_bar.dart';
 import 'package:guardian_net/widgets/sidebar.dart';
@@ -36,22 +35,22 @@ class _Home extends State<Home> {
   void _onNavItemTapped(int index) {
     setState(() {
       _currentIndex = index;
+      _isSidebarOpen = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: const Color(0xFFF8FAFC),
       body: Center(
         child: SizedBox.expand(
           child: Container(
-            decoration: BoxDecoration(
-            color: Colors.white,
-            
-          ),
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 216, 213, 213),
+            ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(40),
+              borderRadius: BorderRadius.circular(_isSidebarOpen ? 40 : 0),
               child: Row(
                 children: [
                   // Sidebar
@@ -72,7 +71,7 @@ class _Home extends State<Home> {
                   Expanded(
                     child: Column(
                       children: [
-                        SizedBox(height: 50),
+                        const SizedBox(height: 50),
                         // App Header
                         _buildAppHeader(_isSidebarOpen),
                         // Main Screens
@@ -82,10 +81,8 @@ class _Home extends State<Home> {
                             children: _screens,
                           ),
                         ),
-                        // Bottom Navigation
-                        
-                    ],
-                  ),
+                      ],
+                    ),
                 ),
               ],
             ),
@@ -93,16 +90,31 @@ class _Home extends State<Home> {
           ),
         ),
       ),
-      floatingActionButton: GestureDetector(
-        onTap: _toggleSidebar,
-        child: Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(8),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(top: 35),
+        child: GestureDetector(
+          onTap: _toggleSidebar,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: _isSidebarOpen ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha:0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(
+              _isSidebarOpen ? Icons.close : Icons.menu,
+              size: 20,
+              color: _isSidebarOpen ? Colors.white : const Color(0xFF0F172A),
+            ),
           ),
-          child: const Icon(Icons.menu, size: 18, color: Color(0xFF0F172A)),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
@@ -114,66 +126,115 @@ class _Home extends State<Home> {
   }
 
   
-  Widget _buildAppHeader(bool isSidebarOpen) {
-    return Padding(
-      padding: EdgeInsets.only(left: isSidebarOpen ? 10 : 24, right: 24, top: 8, bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'GuardianNet',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-          ),
-          const Text(
-            'neighbourhood emergency · community verified',
-            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-          ),
-          const SizedBox(height: 12),
-          Consumer<SessionProvider>(
-            builder: (context, provider, child) {
-              return Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFF0F9FF), Color(0xFFE0F2FE)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFBAE6FD)),
+Widget _buildAppHeader(bool isSidebarOpen) {
+  return Padding(
+    padding: EdgeInsets.only(
+        left: isSidebarOpen ? 10 : 24, right: 24, top: 8, bottom: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'GuardianNet',
+                  style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                      letterSpacing: -1),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F172A),
-                        borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB),
+                      borderRadius: BorderRadius.circular(6)),
+                  child: const Text('LIVE',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w900)),
+                )
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Consumer<SessionProvider>(
+          builder: (context, provider, child) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [const Color(0xFFF8FAFC), Colors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFE2E8F0).withValues(alpha:0.5)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha:0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0F172A), Color(0xFF334155)],
                       ),
-                      child: const Icon(Icons.wind_power, color: Color(0xFF38BDF8), size: 16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(width: 10),
-                    Column(
+                    child: const Icon(Icons.auto_awesome,
+                        color: Color(0xFFFBBF24), size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Guardian Reputation', style: TextStyle(fontSize: 10, color: Color(0xFF0369A1), fontWeight: FontWeight.w700)),
+                        const Text('COMMUNITY REPUTATION',
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: Color(0xFF64748B),
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5)),
                         Row(
                           children: [
-                            Text('${provider.user?.reputationCount}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                            Text('${provider.user?.reputationCount ?? 0}',
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF0F172A))),
                             const SizedBox(width: 4),
-                            const Text('XP', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                            const Text('Trust Points',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF94A3B8),
+                                    fontWeight: FontWeight.w500)),
                           ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+                  ),
+                  const Icon(Icons.chevron_right, size: 16, color: Color(0xFFCBD5E1)),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    ),
+  );
+}
 }

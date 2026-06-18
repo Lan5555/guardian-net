@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:guardian_net/modules/auth/views/login.dart';
-import 'package:guardian_net/providers/app_state_provider.dart';
+import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:guardian_net/providers/session_provider.dart';
+import 'package:guardian_net/providers/socket_provider.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -12,11 +13,12 @@ Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
-  
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => AppStateProvider()),
+        ChangeNotifierProvider(create: (context) => SocketProvider()),
+        ChangeNotifierProvider(create: (context) => AlertProvider()),
         ChangeNotifierProvider(create: (context) => SessionProvider()),
       ],
       child: const GuardianNetApp(),
