@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:provider/provider.dart';
 import '../models/alert_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CommunityAlertsList extends StatelessWidget {
   const CommunityAlertsList({super.key});
@@ -116,7 +117,24 @@ class _AlertItemState extends State<_AlertItem> {
               const SizedBox(height: 10),
               Align(alignment: Alignment.centerLeft, child: Text(widget.alert.title ?? 'Emergency Alert', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800))),
               const SizedBox(height: 4),
-              Align(alignment: Alignment.centerLeft, child: Text(widget.alert.message ?? '', style: const TextStyle(fontSize: 13, color: Color(0xFF475569)))),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: widget.alert.subject == 'LOCATION_SHARE' && widget.alert.message != null && widget.alert.message!.contains('http')
+                    ? InkWell(
+                        onTap: () async {
+                          final url = RegExp(r'(https?://[^\s]+)').stringMatch(widget.alert.message!);
+                          if (url != null) {
+                            final uri = Uri.parse(url);
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            }
+                          }
+                        },
+                        child: Text(widget.alert.message!,
+                            style: const TextStyle(fontSize: 13, color: Color(0xFF2563EB), decoration: TextDecoration.underline)),
+                      )
+                    : Text(widget.alert.message ?? '', style: const TextStyle(fontSize: 13, color: Color(0xFF475569))),
+              ),
               const SizedBox(height: 6),
               Row(
                 children: [

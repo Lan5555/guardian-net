@@ -1,4 +1,6 @@
 // lib/widgets/location_share_card.dart
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:guardian_net/providers/session_provider.dart';
@@ -45,21 +47,41 @@ class _LocationShareCardState extends State<LocationShareCard> {
           ),
           const SizedBox(height: 12),
           GestureDetector(
-            onTap: _isSharing ? null : () async {
-              setState(() => _isSharing = true);
-              await context.read<SessionProvider>().shareLocation();
-              if (context.mounted) {
-              _showToast(
-                context,
-                '📍 Location shared with responders & nearby verified users (SMS + push).',
-              );
-              }
-              setState(() => _isSharing = false);
-            },
+            onTap: _isSharing
+                ? null
+                : () async {
+                    setState(() => _isSharing = true);
+                    final user = context.read<SessionProvider>().user;
+                    final locationDetails = context.read<SessionProvider>();
+                    await locationDetails.initLiveLocation();
+                    if (user != null && user.communityId != null) {
+                      await context
+                          .read<AlertProvider>()
+                          .sendNewUserAlert(
+                            'LOCATION_SHARE',
+                            communityId: user.communityId!,
+                            userId: user.id,
+                            userName: user.name,
+                            context: context,
+                            message: locationDetails.liveLocation,
+                          )
+                      .then((_) async {
+                        await context.read<SessionProvider>().shareLocation();
+                        if (context.mounted) {
+                          _showToast(
+                            context,
+                            '📍 Location shared with responders & nearby verified users (SMS + push).',
+                          );
+                        }
+                      });
+                    }
+                    setState(() => _isSharing = false);
+                  },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
+                color:
+                    _isSharing ? const Color(0xFF64748B) : const Color(0xFF0F172A),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: const [
                   BoxShadow(
@@ -76,7 +98,10 @@ class _LocationShareCardState extends State<LocationShareCard> {
                       ? const SizedBox(
                           height: 16,
                           width: 16,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Icon(Icons.share, color: Colors.white, size: 16),
                   const SizedBox(width: 8),

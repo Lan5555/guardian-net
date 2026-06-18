@@ -5,6 +5,7 @@ import 'package:guardian_net/modules/history/controller/history_controller.dart'
 import 'package:guardian_net/providers/session_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -54,8 +55,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                     const SizedBox(width: 12),
                     _StatCard(
-                      title: 'Community',
-                      value: controller.history.length.toString(),
+                      title: 'Community ID',
+                      value: sessionProvider.user?.communityId?.toString() ?? 'Loading...',
                       icon: Icons.public_outlined,
                       color: const Color(0xFF2563EB),
                     ),
@@ -137,7 +138,7 @@ class _StatCard extends StatelessWidget {
           border: Border.all(color: color == const Color(0xFF0F172A) ? Colors.transparent : const Color(0xFFF1F5F9)),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.05),
+              color: color.withValues(alpha:0.05),
               blurRadius: 15,
               offset: const Offset(0, 4),
             ),
@@ -253,10 +254,26 @@ class _HistoryCard extends StatelessWidget {
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
             ),
             const SizedBox(height: 8),
-            Text(
-              report.message ?? 'No additional details provided for this alert.',
-              style: const TextStyle(fontSize: 15, color: Color(0xFF334155), height: 1.5),
-            ),
+            report.subject == 'LOCATION_SHARE' && report.message != null && report.message!.contains('http')
+                ? InkWell(
+                    onTap: () async {
+                      final url = RegExp(r'(https?://[^\s]+)').stringMatch(report.message!);
+                      if (url != null) {
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri) || true) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      }
+                    },
+                    child: Text(
+                      report.message!,
+                      style: const TextStyle(fontSize: 15, color: Color(0xFF2563EB), decoration: TextDecoration.underline, height: 1.5),
+                    ),
+                  )
+                : Text(
+                    report.message ?? 'No additional details provided for this alert.',
+                    style: const TextStyle(fontSize: 15, color: Color(0xFF334155), height: 1.5),
+                  ),
             const SizedBox(height: 24),
             _detailItem(Icons.location_on_outlined, 'Location', report.location ?? 'Unknown Location'),
             _detailItem(Icons.calendar_today_outlined, 'Date Reported', report.createdAt?.toString().split('.')[0] ?? 'Just now'),
@@ -294,7 +311,7 @@ class _HistoryCard extends StatelessWidget {
           border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0F172A).withOpacity(0.04),
+              color: const Color(0xFF0F172A).withValues(alpha:0.04),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),

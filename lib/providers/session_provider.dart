@@ -15,6 +15,7 @@ class SessionProvider extends ChangeNotifier {
 
   StreamSubscription<Position>? locationStream;
   Position? userLocation;
+  String? liveLocation;
 
   void setUser(UserModel? user) {
     _user = user;
@@ -62,6 +63,17 @@ class SessionProvider extends ChangeNotifier {
         "https://www.google.com/maps/search/?api=1&query=${pos.latitude},${pos.longitude}";
 
     return url;
+  }
+
+  Future<void> initLiveLocation () async {
+    Position pos = await Geolocator.getCurrentPosition();
+
+    final message =
+        "Here is my location:\n"
+        "https://www.google.com/maps/search/?api=1&query=${pos.latitude},${pos.longitude}";
+
+   liveLocation = message;
+    notifyListeners();
   }
 
   Future<void> shareLocation() async {
