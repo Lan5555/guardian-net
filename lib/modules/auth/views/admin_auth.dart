@@ -68,11 +68,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-                  ),
+                  color: Colors.black,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -82,11 +78,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.admin_panel_settings,
-                  color: Colors.white,
-                  size: 36,
-                ),
+                child: Image.asset('assets/armor.png', scale: 15,),
               ),
               const SizedBox(height: 28),
               // Enhanced header text

@@ -18,7 +18,6 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   late AuthController _controller;
   late Onboardingcontroller _onboardingcontroller;
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -61,11 +60,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                  ),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -75,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.shield, color: Colors.white, size: 36),
+                child: Image.asset('assets/armor.png'),
               ),
               const SizedBox(height: 32),
               // Enhanced header text

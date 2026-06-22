@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:guardian_net/models/community_model.dart';
 import 'package:guardian_net/modules/auth/services/auth_service.dart';

@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:guardian_net/helpers/helpers.dart';
 import 'package:guardian_net/models/alert_model.dart';
 import 'package:guardian_net/models/community_model.dart';

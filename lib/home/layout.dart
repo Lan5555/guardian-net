@@ -138,6 +138,11 @@ Widget _buildAppHeader(bool isSidebarOpen) {
           children: [
             Row(
               children: [
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: Image.asset('assets/armor.png')),
+                SizedBox(width: 5,),
                 const Text(
                   'GuardianNet',
                   style: TextStyle(
