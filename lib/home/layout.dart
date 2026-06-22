@@ -47,7 +47,7 @@ class _Home extends State<Home> {
         child: SizedBox.expand(
           child: Container(
             decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 216, 213, 213),
+              color: Color.fromARGB(255, 243, 241, 241),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(_isSidebarOpen ? 40 : 0),
@@ -91,7 +91,7 @@ class _Home extends State<Home> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 35),
+        padding: const EdgeInsets.only(top: 25),
         child: GestureDetector(
           onTap: _toggleSidebar,
           child: AnimatedContainer(

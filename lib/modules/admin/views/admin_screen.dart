@@ -24,6 +24,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       setState(() {});
     });
     _adminController.fetchData();
+    _adminController.fetchAlerts();
+    _adminController.fetchUsers();
   }
 
   @override
@@ -170,7 +172,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   void _showEditUserDialog(UserModel user) {
     _adminController.nameController.text = user.name ?? '';
-     _adminController.phoneController.text = user.phone ?? '';
+    _adminController.phoneController.text = user.phone ?? '';
     int? selectedCommunityId = user.communityId;
 
     showModalBottomSheet(
@@ -332,13 +334,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
         decoration: InputDecoration(
           hintText: label,
           prefixIcon: Icon(icon, size: 20, color: const Color(0xFF94A3B8)),
-          suffixIcon: _adminController.isLocalStateLoading && label == "Location Address"
+          suffixIcon:
+              _adminController.isLocalStateLoading &&
+                  label == "Location Address"
               ? const Padding(
                   padding: EdgeInsets.all(12.0),
                   child: SizedBox(
                     height: 20,
                     width: 20,
-                    child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      color: Colors.black,
+                      strokeWidth: 2,
+                    ),
                   ),
                 )
               : null,
@@ -348,10 +355,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
           ),
-          
         ),
         onChanged: (val) async {
-          if(_adminController.locationController.text.isNotEmpty && setModalState != null){
+          if (_adminController.locationController.text.isNotEmpty &&
+              setModalState != null) {
             await _adminController.getLatLngFromOSM(val, setModalState);
           }
         },
@@ -477,7 +484,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return GestureDetector(
       onTap: () {
         setState(() => _adminController.activeTab = index);
-        if(index == 2 && _adminController.alerts.isEmpty){
+        if (index == 2 && _adminController.alerts.isEmpty) {
           _adminController.fetchAlerts();
         }
         if (index == 1 && _adminController.users.isEmpty) {
@@ -521,7 +528,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _buildStatCards(),
+        _buildStatCards(_adminController),
         const SizedBox(height: 32),
         const Text(
           "Managed Communities",
@@ -893,17 +900,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _adminController.alerts.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final alert = _adminController.alerts[index];
                     return InkWell(
                       onTap: () => _showAlertDetails(alert),
                       borderRadius: BorderRadius.circular(16),
                       child: _buildAlertItem(
-                          alert.title ?? alert.subject ?? "Alert",
-                          alert.location ?? "Unknown",
-                          alert.createdAt?.toString().split('.')[0] ?? "Recently",
-                          true),
+                        alert.title ?? alert.subject ?? "Alert",
+                        alert.location ?? "Unknown",
+                        alert.createdAt?.toString().split('.')[0] ?? "Recently",
+                        true,
+                      ),
                     );
                   },
                 ),
@@ -944,31 +953,55 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 Expanded(
                   child: Text(
                     alert.title ?? "Emergency Alert",
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 IconButton(
                   onPressed: () {
-                     _adminController.deleteAlert(alert.id); 
+                    _adminController.deleteAlert(alert.id);
                     Navigator.pop(context);
                   },
-                  icon:  const Icon(Icons.delete_outline, color: Color(0xFFEF4444)),
-                  style: IconButton.styleFrom(backgroundColor: Color(0xFFFEF2F2)),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFEF4444),
+                  ),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Color(0xFFFEF2F2),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             _detailRow(Icons.info_outline, "Subject", alert.subject ?? "N/A"),
             const SizedBox(height: 12),
-            _detailRow(Icons.person_outline, "Reporter", alert.reporter ?? "Anonymous"),
+            _detailRow(
+              Icons.person_outline,
+              "Reporter",
+              alert.reporter ?? "Anonymous",
+            ),
             const SizedBox(height: 12),
-            _detailRow(Icons.location_on_outlined, "Location", alert.location ?? "Unknown"),
+            _detailRow(
+              Icons.location_on_outlined,
+              "Location",
+              alert.location ?? "Unknown",
+            ),
             const SizedBox(height: 12),
-            _detailRow(Icons.access_time, "Timestamp", alert.createdAt?.toString() ?? "N/A"),
+            _detailRow(
+              Icons.access_time,
+              "Timestamp",
+              alert.createdAt?.toString() ?? "N/A",
+            ),
             const SizedBox(height: 24),
             const Text(
               "Message Details",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF64748B),
+              ),
             ),
             const SizedBox(height: 8),
             Container(
@@ -980,7 +1013,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               child: Text(
                 alert.message ?? "No additional details provided.",
-                style: const TextStyle(fontSize: 14, color: Color(0xFF334155), height: 1.5),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF334155),
+                  height: 1.5,
+                ),
               ),
             ),
             const SizedBox(height: 32),
@@ -991,9 +1028,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F172A),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: const Text("Close Log", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                child: const Text(
+                  "Close Log",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ],
@@ -1065,7 +1110,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _buildStatCards() {
+  Widget _buildStatCards(AdminController controller) {
     return Row(
       children: [
         Expanded(
@@ -1077,10 +1122,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ),
         const SizedBox(width: 16),
-        const Expanded(
+        Expanded(
           child: _StatCard(
             title: "Active Alerts",
-            value: "12",
+            value: controller.alerts.length.toString(),
             icon: Icons.warning_amber_rounded,
             color: Color(0xFFEF4444),
           ),

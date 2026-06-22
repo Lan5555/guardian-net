@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:guardian_net/helpers/helpers.dart';
@@ -13,6 +15,7 @@ import 'package:guardian_net/providers/session_provider.dart';
 import 'package:guardian_net/providers/socket_provider.dart';
 import 'package:guardian_net/service/core_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends ChangeNotifier {
   final emailController = TextEditingController();
@@ -82,7 +85,14 @@ class AuthController extends ChangeNotifier {
       showToast(context, res.message);
       user = UserModel.fromJson(res.data);
       context.read<SessionProvider>().setUser(user);
-      context.read<SocketProvider>().connect(user!.communityId!, context.read<AlertProvider>());
+      context.read<SocketProvider>().connect(
+        user!.communityId!,
+        context.read<AlertProvider>(),
+      );
+      await saveLoginDetails(
+        loginEmailController.text,
+        loginPasswordController.text,
+      );
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Home()),
@@ -97,6 +107,23 @@ class AuthController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> checkIfContainsCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final credentials = prefs.getString('credentials');
+    if (credentials != null) {
+      final userDetails = jsonDecode(credentials);
+      loginEmailController.text = userDetails['email']!;
+      loginPasswordController.text = userDetails['password']!;
+      notifyListeners();
+    }
+  }
+
+  Future<void> saveLoginDetails(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userDetails = {'email': email, 'password': password};
+    await prefs.setString('credentials', jsonEncode(userDetails));
   }
 
   Future<void> handleRegister() async {
@@ -121,14 +148,17 @@ class AuthController extends ChangeNotifier {
       'email': registerEmailController.text,
       'password': registerPasswordController.text,
       'community_id': selectedCommunity?.id ?? 0,
-      'phone': phoneController.text
+      'phone': phoneController.text,
     };
     NetResponse res = await _service.registerUser(payload);
     if (res.success) {
       user = UserModel.fromJson(res.data);
 
       context.read<SessionProvider>().setUser(user);
-
+      context.read<SocketProvider>().connect(
+        user!.communityId!,
+        context.read<AlertProvider>(),
+      );
       showToast(context, res.message);
       isLoading = false;
       notifyListeners();

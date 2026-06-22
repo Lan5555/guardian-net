@@ -14,7 +14,7 @@ class Sidebar extends StatelessWidget {
     if (!isOpen) return const SizedBox.shrink();
     return Container(
       width: 60,
-      color: Color.fromARGB(255, 216, 213, 213),
+      color: Color.fromARGB(255, 243, 241, 241),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

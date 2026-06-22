@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:guardian_net/modules/auth/views/login.dart';
+import 'package:guardian_net/modules/onboarding/views/onboarding_screen.dart';
 import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:guardian_net/providers/session_provider.dart';
 import 'package:guardian_net/providers/socket_provider.dart';
@@ -43,7 +44,7 @@ class GuardianNetApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const OnboardingScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

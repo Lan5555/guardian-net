@@ -76,8 +76,8 @@ class AdminController extends ChangeNotifier {
     final payload = {
       'name': nameController.text,
       'location': locationController.text,
-      'longitude': longController.text,
-      'latitude': latController.text,
+      'longitude': double.parse(longController.text),
+      'latitude': double.parse(latController.text),
     };
 
     final res = id == null
@@ -96,7 +96,7 @@ class AdminController extends ChangeNotifier {
       await fetchData();
       showToast(context, res.message);
     } else {
-      showToast(context, res.message, isError: true);
+      showFeedBack(context, res.message, isError: true);
     }
   }
 

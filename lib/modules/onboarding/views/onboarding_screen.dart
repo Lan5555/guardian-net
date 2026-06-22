@@ -15,23 +15,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   late Onboardingcontroller controller;
+  
   @override
   void initState() {
     super.initState();
     controller = Onboardingcontroller(context: context);
-    controller.addListener(() {
-      setState(() {});
-    });
+    controller.addListener(_onControllerChanged);
     controller.checkOnBoardingStatus(context);
     controller.pingServer();
   }
 
+  // Extracted listener method
+  void _onControllerChanged() {
+    // Check if widget is still mounted before calling setState
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    // Remove listener to prevent memory leaks
+    controller.removeListener(_onControllerChanged);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E1A),
+      backgroundColor: Colors.white,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: SystemUiOverlayStyle.dark,
         child: SafeArea(
           child: Column(
             children: [
@@ -45,11 +61,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () {
-                        // Handle skip
+                      onPressed: () async {
+                        final pref = await SharedPreferences.getInstance();
+                        await pref.setString('has_viewed', 'true');
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                        );
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.white.withValues(alpha: .6),
+                        foregroundColor: Colors.grey.withValues(alpha: .7),
                         textStyle: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
@@ -106,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      const Color(0xFF0A0E1A).withValues(alpha: .9),
+                      Colors.grey.withValues(alpha: .05),
                     ],
                   ),
                 ),
@@ -124,13 +147,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           height: 8,
                           decoration: BoxDecoration(
                             color: _currentPage == index
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: .3),
+                                ? const Color(0xFF0A0E1A)
+                                : Colors.grey.withValues(alpha: .4),
                             borderRadius: BorderRadius.circular(4),
                             boxShadow: _currentPage == index
                                 ? [
                                     BoxShadow(
-                                      color: Colors.white.withValues(alpha: .3),
+                                      color: const Color(0xFF0A0E1A).withValues(alpha: .2),
                                       blurRadius: 12,
                                       spreadRadius: 2,
                                     ),
@@ -160,9 +183,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               );
                             },
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF0A0E1A),
                               side: BorderSide(
-                                color: Colors.white.withValues(alpha: .3),
+                                color: const Color(0xFF0A0E1A).withValues(alpha: .2),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -184,19 +207,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Expanded(
                           flex: 2,
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               if (_currentPage < 2) {
                                 _pageController.nextPage(
                                   duration: const Duration(milliseconds: 500),
                                   curve: Curves.easeInOutCubic,
                                 );
                               } else {
-                                // Navigate to home
+                                final pref =
+                                    await SharedPreferences.getInstance();
+                                await pref.setString('has_viewed', 'true');
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LoginScreen(),
+                                  ),
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF0A0E1A),
+                              backgroundColor: const Color(0xFF0A0E1A),
+                              foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
@@ -255,15 +286,15 @@ class OnboardingPage extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  color.withValues(alpha: .2),
-                  color.withValues(alpha: .05),
+                  color.withValues(alpha: .1),
+                  color.withValues(alpha: .02),
                 ],
               ),
               shape: BoxShape.circle,
-              border: Border.all(color: color.withValues(alpha: .3), width: 2),
+              border: Border.all(color: color.withValues(alpha: .2), width: 2),
               boxShadow: [
                 BoxShadow(
-                  color: color.withValues(alpha: .3),
+                  color: color.withValues(alpha: .15),
                   blurRadius: 60,
                   spreadRadius: 10,
                 ),
@@ -280,7 +311,7 @@ class OnboardingPage extends StatelessWidget {
             style: const TextStyle(
               fontSize: 34,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: Color(0xFF0A0E1A),
               height: 1.1,
               letterSpacing: -0.5,
             ),
@@ -294,7 +325,7 @@ class OnboardingPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
-              color: Colors.white.withValues(alpha: .7),
+              color: Colors.grey.withValues(alpha: .8),
               height: 1.6,
               letterSpacing: 0.2,
             ),
