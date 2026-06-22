@@ -55,6 +55,8 @@ class _LocationShareCardState extends State<LocationShareCard> {
                     final locationDetails = context.read<SessionProvider>();
                     await locationDetails.initLiveLocation();
                     if (user != null && user.communityId != null) {
+                      final customizedMessage =
+                          '${locationDetails.liveLocation}, ${user.name} Phone Number ${user.phone}';
                       await context
                           .read<AlertProvider>()
                           .sendNewUserAlert(
@@ -63,25 +65,28 @@ class _LocationShareCardState extends State<LocationShareCard> {
                             userId: user.id,
                             userName: user.name,
                             context: context,
-                            message: locationDetails.liveLocation,
+                            message: customizedMessage,
                           )
-                      .then((_) async {
-                        await context.read<SessionProvider>().shareLocation();
-                        if (context.mounted) {
-                          _showToast(
-                            context,
-                            '📍 Location shared with responders & nearby verified users (SMS + push).',
-                          );
-                        }
-                      });
+                          .then((_) async {
+                            await context
+                                .read<SessionProvider>()
+                                .shareLocation();
+                            if (context.mounted) {
+                              _showToast(
+                                context,
+                                '📍 Location shared with responders & nearby verified users (SMS + push).',
+                              );
+                            }
+                          });
                     }
                     setState(() => _isSharing = false);
                   },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color:
-                    _isSharing ? const Color(0xFF64748B) : const Color(0xFF0F172A),
+                color: _isSharing
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF0F172A),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: const [
                   BoxShadow(
