@@ -99,6 +99,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 icon: Icons.lock_outline,
                 isPassword: true,
               ),
+              _buildTextField(
+                controller: _controller.phoneController,
+                label: 'Phone',
+                hint: '09010000000',
+                icon: Icons.phone,
+                isPassword: false,
+              ),
               const SizedBox(height: 20),
               const Text(
                 'Primary Community',

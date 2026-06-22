@@ -53,6 +53,7 @@ class AlertProvider extends ChangeNotifier {
     final res = await _service.sendAlert(data);
     if (res.success) {
       isLoading = false;
+      await sendSmsToAll(message!, communityId, context);
       notifyListeners();
     } else {
       if (kDebugMode) {
@@ -63,11 +64,26 @@ class AlertProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> sendSmsToAll(
+    String message,
+    int communityId,
+    BuildContext context,
+  ) async {
+    final payload = {"message": message};
+    final res = await _service.sendBulkSms(communityId, payload);
+    if (res.success) {
+      notifyListeners();
+    } else {
+      showToast(context, res.message);
+    }
+  }
+
   Future<void> triggerPanic(BuildContext context) async {
     final user = context.read<SessionProvider>().user;
     if (user == null) return;
     await sendNewUserAlert(
       'PANIC',
+      message: 'PANIC Emergency has been reported in your area.',
       communityId: user.communityId!,
       userId: user.id,
       userName: user.name,
@@ -80,8 +96,10 @@ class AlertProvider extends ChangeNotifier {
     int alertId,
     BuildContext context, {
     StateSetter? setModalState,
+    VoidCallback? callback,
   }) async {
     isLoading = true;
+    final user = context.read<SessionProvider>().user;
     if (setModalState != null) {
       setModalState.call(() {});
     }
@@ -94,6 +112,14 @@ class AlertProvider extends ChangeNotifier {
         alerts[alertIndex].copyWith(isVerified: true);
       }
       showFeedBack(context, res.message);
+      await sendSmsToAll(
+        'Emergency Alert successfully confirmed.',
+        user!.communityId!,
+        context,
+      );
+      if (callback != null) {
+        callback();
+      }
       if (setModalState != null) {
         setModalState.call(() {});
       }
@@ -112,9 +138,15 @@ class AlertProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     final res = await _service.flagAsFalse(alertId);
+    final user = context.read<SessionProvider>().user;
     if (res.success) {
       isLoading = false;
       //showFeedBack(context, res.message);
+      await sendSmsToAll(
+        'Emergency Alert flagged as false',
+        user!.communityId!,
+        context,
+      );
       notifyListeners();
     } else {
       isLoading = false;

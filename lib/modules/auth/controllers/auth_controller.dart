@@ -23,6 +23,7 @@ class AuthController extends ChangeNotifier {
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final phoneController = TextEditingController();
   bool agreeToTerms = false;
   bool isPasswordVisible = false;
   CommunityModel? selectedCommunity;
@@ -118,8 +119,9 @@ class AuthController extends ChangeNotifier {
     final payload = {
       'name': nameController.text,
       'email': registerEmailController.text,
-      'password': registerEmailController.text,
+      'password': registerPasswordController.text,
       'community_id': selectedCommunity?.id ?? 0,
+      'phone': phoneController.text
     };
     NetResponse res = await _service.registerUser(payload);
     if (res.success) {

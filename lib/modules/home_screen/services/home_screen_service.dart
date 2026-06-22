@@ -18,4 +18,8 @@ class HomeScreenService extends CoreService {
   Future<NetResponse> flagAsFalse(int alertId) async {
     return get('/community-alerts/flag-as-false?alertId=$alertId');
   }
+
+  Future<NetResponse> sendBulkSms(int communityId, dynamic data) async {
+    return await send('/community-alerts/send-bulk-sms?community_id=$communityId', data);
+  }
 }

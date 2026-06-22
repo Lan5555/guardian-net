@@ -48,15 +48,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 16),
             Consumer<SessionProvider>(
               builder: (context, sessionProvider, child) {
-                final userReports = controller.history
-                    .where((a) => a.reportedId == sessionProvider.user?.id)
-                    .toList();
+                // final userReports = controller.history
+                //     .where((a) => a.reportedId == sessionProvider.user?.id)
+                //     .toList();
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _StatCard(
-                      title: 'My Reports',
-                      value: userReports.length.toString(),
+                      title: 'All Reports',
+                      value: controller.history.length.toString(),
                       icon: Icons.campaign_outlined,
                       color: const Color(0xFF0F172A),
                     ),
@@ -85,11 +85,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   );
                 }
-                final userReports = controller.history
-                    .where((a) => a.reportedId == sessionProvider.user?.id)
-                    .toList();
+                // final userReports = controller.history
+                //     .where((a) => a.reportedId == sessionProvider.user?.id)
+                //     .toList();
 
-                if (userReports.isEmpty) {
+                if (controller.history.isEmpty) {
                   return Container(
                     padding: const EdgeInsets.symmetric(
                       vertical: 60,
@@ -129,7 +129,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   );
                 }
                 return Column(
-                  children: userReports
+                  children: controller.history
                       .map((report) => _HistoryCard(report: report))
                       .toList(),
                 );
@@ -223,6 +223,7 @@ class _HistoryCard extends StatefulWidget {
 
 class _HistoryCardState extends State<_HistoryCard> {
   bool isLoading = false;
+  late HistoryController controller;
   String _formatDate(DateTime? date) {
     if (date == null) return 'Just now';
     final now = DateTime.now();
@@ -231,6 +232,12 @@ class _HistoryCardState extends State<_HistoryCard> {
       return '${difference.inMinutes == 0 ? 1 : difference.inMinutes}m ago';
     }
     return DateFormat('MMM d, h:mm a').format(date);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    controller = HistoryController(context: context);
   }
 
   void _showDetails(BuildContext context) {
@@ -358,26 +365,29 @@ class _HistoryCardState extends State<_HistoryCard> {
                 _detailItem(
                   Icons.calendar_today_outlined,
                   'Date Reported',
-                  widget.report.createdAt?.toString().split('.')[0] ?? 'Just now',
+                  widget.report.createdAt?.toString().split('.')[0] ??
+                      'Just now',
                   false,
                 ),
                 _detailItem(
                   Icons.badge,
                   'Status',
                   widget.report.isVerified ? 'Verified' : 'Not Verified',
-                  true,
+                  !widget.report.isVerified,
                   isLoading: context.read<AlertProvider>().isLoading,
                   action: () async {
                     final callback = context.read<AlertProvider>();
                     final user = context.read<SessionProvider>().user;
-                    
+
                     await callback.verifyCommunityAlert(
                       user!.id,
                       widget.report.id!,
                       context,
-                      setModalState: modalState
+                      setModalState: modalState,
+                      callback: () {
+                        controller.fetchHistory();
+                      },
                     );
-                    
                   },
                   actionName: 'Verify',
                 ),
@@ -407,7 +417,7 @@ class _HistoryCardState extends State<_HistoryCard> {
               ],
             ),
           );
-        }
+        },
       ),
     );
   }
@@ -444,7 +454,9 @@ class _HistoryCardState extends State<_HistoryCard> {
                   ),
                   decoration: ShapeDecoration(
                     color:
-                        (widget.report.subject ?? '').toUpperCase().contains('PANIC')
+                        (widget.report.subject ?? '').toUpperCase().contains(
+                          'PANIC',
+                        )
                         ? const Color(0xFFFEF2F2)
                         : const Color(0xFFF1F5F9),
                     shape: StadiumBorder(),
@@ -495,7 +507,8 @@ class _HistoryCardState extends State<_HistoryCard> {
                 letterSpacing: -0.3,
               ),
             ),
-            if (widget.report.message != null && widget.report.message!.isNotEmpty) ...[
+            if (widget.report.message != null &&
+                widget.report.message!.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 widget.report.message!,
@@ -582,57 +595,60 @@ class _HistoryCardState extends State<_HistoryCard> {
   }
 }
 
-  Widget _detailItem(
-    IconData icon,
-    String label,
-    String value,
-    bool hasAction, {
-    Function()? action,
-    String? actionName,
-    bool? isLoading,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: const Color(0xFF94A3B8)),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+Widget _detailItem(
+  IconData icon,
+  String label,
+  String value,
+  bool hasAction, {
+  Function()? action,
+  String? actionName,
+  bool? isLoading,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: Row(
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF94A3B8)),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+            ),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
               ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF0F172A),
+            ),
+            if (hasAction)
+              ElevatedButton(
+                onPressed: () => action!(),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black,
                 ),
+                child: isLoading!
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(actionName!),
               ),
-              if (hasAction)
-                ElevatedButton(
-                  onPressed: () => action!(),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.black,
-                  ),
-                  child: isLoading!
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2,),
-                        )
-                      : Text(actionName!),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
 class SectionTitle extends StatelessWidget {
   final IconData icon;

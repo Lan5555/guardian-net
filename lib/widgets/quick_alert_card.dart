@@ -110,10 +110,14 @@ class _AlertCard extends StatelessWidget {
       _showToast(context, 'Invalid Community Id');
       return;
     }
-    Provider.of<AlertProvider>(
-      context,
-      listen: false,
-    ).sendNewUserAlert(type, communityId: currentUser!.communityId!, userId: currentUser.id, userName: currentUser.name!, context: context);
+    Provider.of<AlertProvider>(context, listen: false).sendNewUserAlert(
+      type,
+      communityId: currentUser!.communityId!,
+      userId: currentUser.id,
+      userName: currentUser.name!,
+      context: context,
+      message: '$label alert reported in your area.',
+    );
     _showToast(
       context,
       '🚨 $label alert sent! Nearby users & responders notified.',
