@@ -2,10 +2,11 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:guardian_net/helpers/helpers.dart';
 import 'package:guardian_net/models/community_model.dart';
 import 'package:guardian_net/modules/auth/controllers/auth_controller.dart';
 import 'package:guardian_net/modules/auth/views/login.dart';
-
+import 'package:guardian_net/modules/onboarding/controller/onboarding_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -16,18 +17,21 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   late AuthController _controller;
+  late Onboardingcontroller _onboardingcontroller;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _controller = AuthController(context: context);
+    _onboardingcontroller = Onboardingcontroller(context: context);
     _controller.addListener(() {
       setState(() {});
     });
-     _controller.fetchCommunities();
+    _controller.fetchCommunities();
+    if (!_onboardingcontroller.hasLoaded) {
+      _onboardingcontroller.pingServer();
+    }
   }
-
-
 
   @override
   void dispose() {
@@ -71,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 40),
               _buildTextField(
-                controller: _controller.nameController ,
+                controller: _controller.nameController,
                 label: 'Full Name',
                 hint: 'Alex Morgan',
                 icon: Icons.person_outline,
@@ -128,10 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     value: _controller.selectedCommunity,
                     hint: const Text(
                       'Select Community',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF94A3B8),
-                      ),
+                      style: TextStyle(fontSize: 15, color: Color(0xFF94A3B8)),
                     ),
                     isExpanded: true,
                     icon: const Icon(
@@ -173,8 +174,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: 24,
                     child: Checkbox(
                       value: _controller.agreeToTerms,
-                      onChanged: (val) =>
-                          setState(() => _controller.agreeToTerms = val ?? false),
+                      onChanged: (val) => setState(
+                        () => _controller.agreeToTerms = val ?? false,
+                      ),
                       activeColor: const Color(0xFF2563EB),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
@@ -195,34 +197,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _controller.agreeToTerms
+                  onPressed: !_onboardingcontroller.hasLoaded ? (){
+                    showToast(context, 'Server still loading...');
+                  } :
+                   (_controller.agreeToTerms
                       ? _controller.handleRegister
-                      : null,
+                      : null),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F172A),
+                    backgroundColor: _onboardingcontroller.hasLoaded ? const Color(0xFF0F172A) : Colors.grey,
                     disabledBackgroundColor: const Color(0xFFE2E8F0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
-                child: _controller.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+                  child: _controller.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Create Account',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      )
-                    : const Text(
-                        'Create Account',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -290,7 +295,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: const Color(0xFF94A3B8),
                     ),
                     onPressed: () => setState(
-                      () => _controller.isPasswordVisible = !_controller.isPasswordVisible,
+                      () => _controller.isPasswordVisible =
+                          !_controller.isPasswordVisible,
                     ),
                   )
                 : null,
