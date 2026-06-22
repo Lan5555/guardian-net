@@ -1,6 +1,8 @@
 // lib/widgets/community_alerts_list.dart
 import 'package:flutter/material.dart';
+import 'package:guardian_net/modules/home_screen/controllers/home_screen_controller.dart';
 import 'package:guardian_net/providers/alert_provider.dart';
+import 'package:guardian_net/providers/session_provider.dart';
 import 'package:provider/provider.dart';
 import '../models/alert_model.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,12 +31,27 @@ class CommunityAlertsList extends StatelessWidget {
                     color: Color(0xFFF0FDF4),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.shield_outlined, size: 32, color: Color(0xFF16A34A)),
+                  child: const Icon(
+                    Icons.shield_outlined,
+                    size: 32,
+                    color: Color(0xFF16A34A),
+                  ),
                 ),
                 const SizedBox(height: 16),
-                const Text('All Clear', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+                const Text(
+                  'All Clear',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 4),
-                const Text('No active alerts in your community right now.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                const Text(
+                  'No active alerts in your community right now.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                ),
               ],
             ),
           );
@@ -58,6 +75,17 @@ class _AlertItem extends StatefulWidget {
 
 class _AlertItemState extends State<_AlertItem> {
   bool _expanded = false;
+  late HomeScreenController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = HomeScreenController(context: context);
+    controller.addListener((){
+      setState(() {
+        
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +97,18 @@ class _AlertItemState extends State<_AlertItem> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _expanded ? const Color(0xFF2563EB).withValues(alpha:0.3) : const Color(0xFFF1F5F9)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.05), blurRadius: 10, offset: const Offset(0, 4))],
+          border: Border.all(
+            color: _expanded
+                ? const Color(0xFF2563EB).withValues(alpha: 0.3)
+                : const Color(0xFFF1F5F9),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -81,12 +119,32 @@ class _AlertItemState extends State<_AlertItem> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: (widget.alert.subject ?? '').toUpperCase().contains('PANIC') ? const Color(0xFFFEF2F2) : const Color(0xFFEFF6FF),
+                      color:
+                          (widget.alert.subject ?? '').toUpperCase().contains(
+                            'PANIC',
+                          )
+                          ? const Color(0xFFFEF2F2)
+                          : const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Text((widget.alert.subject ?? 'ALERT').toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: (widget.alert.subject ?? '').toUpperCase().contains('PANIC') ? const Color(0xFFEF4444) : const Color(0xFF2563EB))),
+                    child: Text(
+                      (widget.alert.subject ?? 'ALERT').toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color:
+                            (widget.alert.subject ?? '').toUpperCase().contains(
+                              'PANIC',
+                            )
+                            ? const Color(0xFFEF4444)
+                            : const Color(0xFF2563EB),
+                      ),
+                    ),
                   ),
                   if (!_expanded)
                     Expanded(
@@ -96,15 +154,31 @@ class _AlertItemState extends State<_AlertItem> {
                           widget.alert.title ?? 'No Title',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
+                          ),
                         ),
                       ),
                     ),
                   Row(
                     children: [
-                      Text(_expanded ? 'Hide' : 'View', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500)),
+                      Text(
+                        _expanded ? 'Hide' : 'View',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       const SizedBox(width: 4),
-                      Icon(_expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 16, color: const Color(0xFF64748B)),
+                      Icon(
+                        _expanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        size: 16,
+                        color: const Color(0xFF64748B),
+                      ),
                     ],
                   ),
                 ],
@@ -114,88 +188,155 @@ class _AlertItemState extends State<_AlertItem> {
               firstChild: const SizedBox(width: double.infinity, height: 0),
               secondChild: Column(
                 children: [
-              const SizedBox(height: 10),
-              Align(alignment: Alignment.centerLeft, child: Text(widget.alert.title ?? 'Emergency Alert', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800))),
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: widget.alert.subject == 'LOCATION_SHARE' && widget.alert.message != null && widget.alert.message!.contains('http')
-                    ? InkWell(
-                        onTap: () async {
-                          final url = RegExp(r'(https?://[^\s]+)').stringMatch(widget.alert.message!);
-                          if (url != null) {
-                            final uri = Uri.parse(url);
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri, mode: LaunchMode.externalApplication);
-                            }
-                          }
-                        },
-                        child: Text(widget.alert.message!,
-                            style: const TextStyle(fontSize: 13, color: Color(0xFF2563EB), decoration: TextDecoration.underline)),
-                      )
-                    : Text(widget.alert.message ?? '', style: const TextStyle(fontSize: 13, color: Color(0xFF475569))),
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  _MetaChip(icon: Icons.location_on_outlined, text: widget.alert.location ?? 'Unknown Location'),
-                ],
-              ),
-              Row(
-                children: [
-                  _MetaChip(icon: Icons.person, text: 'Reporter: ${widget.alert.reporter}'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if ((widget.alert.subject ?? '').toUpperCase().contains('PANIC'))
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.alert.title ?? 'Emergency Alert',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.verified, size: 14, color: Color(0xFF16A34A)),
-                      SizedBox(width: 8),
-                      Expanded(child: Text('SECURED: Responders dispatched via SMS/RFID', style: TextStyle(fontSize: 11, color: Color(0xFF15803D), fontWeight: FontWeight.w700))),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child:
+                        widget.alert.subject == 'LOCATION_SHARE' &&
+                            widget.alert.message != null &&
+                            widget.alert.message!.contains('http')
+                        ? InkWell(
+                            onTap: () async {
+                              final url = RegExp(
+                                r'(https?://[^\s]+)',
+                              ).stringMatch(widget.alert.message!);
+                              if (url != null) {
+                                final uri = Uri.parse(url);
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(
+                                    uri,
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                }
+                              }
+                            },
+                            child: Text(
+                              widget.alert.message!,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF2563EB),
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            widget.alert.message ?? '',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF475569),
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      _MetaChip(
+                        icon: Icons.location_on_outlined,
+                        text: widget.alert.location ?? 'Unknown Location',
+                      ),
                     ],
                   ),
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Confirm',
-                        icon: Icons.check_circle,
-                        color: const Color(0xFF16A34A),
-                        backgroundColor: const Color(0xFFF0FDF4),
-                        onTap: () {
-                          Provider.of<AlertProvider>(context, listen: false).verifyCommunityAlert(widget.alert.reportedId.toString());
-                          _showToast(context, '✅ Alert verified! Responders notified.');
-                        },
+                  Row(
+                    children: [
+                      _MetaChip(
+                        icon: Icons.person,
+                        text: 'Reporter: ${widget.alert.reporter}',
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'False',
-                        icon: Icons.cancel,
-                        color: const Color(0xFFEF4444),
-                        backgroundColor: const Color(0xFFFEE2E2),
-                        onTap: () {
-                          Provider.of<AlertProvider>(context, listen: false).flagAlertAsFalse(widget.alert.reportedId.toString());
-                          _showToast(context, '⚠️ Alert flagged as false. Trust penalty applied.');
-                        },
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if ((widget.alert.subject ?? '').toUpperCase().contains(
+                    'PANIC',
+                  ))
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: Row(
+                        children: const [
+                          Icon(
+                            Icons.verified,
+                            size: 14,
+                            color: Color(0xFF16A34A),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'SECURED: Responders dispatched via SMS/RFID',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF15803D),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                   if(!widget.alert.isVerified)...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ActionButton(
+                            loading: controller.isLoading,
+                            label: 'Confirm',
+                            icon: Icons.check_circle,
+                            color: const Color(0xFF16A34A),
+                            backgroundColor: const Color(0xFFF0FDF4),
+                            onTap: () async {
+                              final user = context.read<SessionProvider>().user;
+                              if (user == null) return;
+                              Provider.of<AlertProvider>(
+                                context,
+                                listen: false,
+                              ).verifyCommunityAlert(
+                                user.id,
+                                widget.alert.id!,
+                                context,
+                              ); 
+                              
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _ActionButton(
+                            loading: controller.isLoading,
+                            label: 'False',
+                            icon: Icons.cancel,
+                            color: const Color(0xFFEF4444),
+                            backgroundColor: const Color(0xFFFEE2E2),
+                            onTap: () {
+                              Provider.of<AlertProvider>(
+                                context,
+                                listen: false,
+                              ).flagAlertAsFalse(widget.alert.id!, context);
+                              
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                ],
+                ]],
               ),
-              crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              crossFadeState: _expanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 300),
             ),
           ],
@@ -205,7 +346,9 @@ class _AlertItemState extends State<_AlertItem> {
   }
 
   void _showToast(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 2)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
   }
 }
 
@@ -220,7 +363,10 @@ class _MetaChip extends StatelessWidget {
       children: [
         Icon(icon, size: 10, color: const Color(0xFF94A3B8)),
         const SizedBox(width: 4),
-        Text(text, style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+        ),
       ],
     );
   }
@@ -231,13 +377,22 @@ class _ActionButton extends StatelessWidget {
   final IconData icon;
   final Color color;
   final Color backgroundColor;
+  final bool loading;
   final VoidCallback onTap;
-  const _ActionButton({required this.label, required this.icon, required this.color, required this.backgroundColor, required this.onTap});
+
+  const _ActionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.backgroundColor,
+    required this.onTap,
+    required this.loading,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: loading ? null : onTap, 
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
         decoration: BoxDecoration(
@@ -245,14 +400,31 @@ class _ActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.transparent),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 12, color: color),
-            const SizedBox(width: 4),
-            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
-          ],
-        ),
+        child: loading
+            ? SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                 
+                  color: color, 
+                  strokeWidth: 2.5, // Slimmer stroke looks cleaner in tight buttons
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 12, color: color),
+                  const SizedBox(width: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

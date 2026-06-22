@@ -36,7 +36,6 @@ class _CustomAlertInputState extends State<CustomAlertInput> {
 
     final alertProvider = context.read<AlertProvider>();
     
-    // Using the existing sendNewUserAlert method from AlertProvider
     await alertProvider.sendNewUserAlert(
       _selectedType.toUpperCase(),
       communityId: user.communityId!,

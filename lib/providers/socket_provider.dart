@@ -23,10 +23,7 @@ class SocketProvider extends ChangeNotifier {
         print('Connected');
       }
 
-      socket.emit(
-        'joinCommunity',
-        communityId,
-      );
+      socket.emit('joinCommunity', communityId);
     });
 
     socket.on('new_alert', (data) {
@@ -34,6 +31,13 @@ class SocketProvider extends ChangeNotifier {
         print('New Alert: $data');
       }
       alertProvider.addAlert(AlertModel.fromJson(data));
+    });
+
+    socket.on('remove_alert', (data) {
+      if (kDebugMode) {
+        print('Removed alert: $data');
+      }
+      alertProvider.removeAlert(AlertModel.fromJson(data));
     });
 
     socket.onDisconnect((_) {
@@ -45,6 +49,7 @@ class SocketProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    socket.disconnect();
     socket.dispose();
     super.dispose();
   }

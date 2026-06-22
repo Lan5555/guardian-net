@@ -1,6 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:guardian_net/helpers/helpers.dart';
 import 'package:guardian_net/models/alert_model.dart';
 import 'package:guardian_net/modules/home_screen/services/home_screen_service.dart';
 import 'package:guardian_net/providers/session_provider.dart';
@@ -13,6 +16,11 @@ class AlertProvider extends ChangeNotifier {
 
   void addAlert(AlertModel alert) {
     alerts.insert(0, alert);
+    notifyListeners();
+  }
+
+  void removeAlert(AlertModel targetId) {
+    alerts.removeWhere((alert) => alert.id == targetId.id);
     notifyListeners();
   }
 
@@ -33,7 +41,9 @@ class AlertProvider extends ChangeNotifier {
     final data = {
       'subject': type,
       'title': '$type Alert',
-      'message': message ?? '${type.toLowerCase() == 'robbery' ? 'An' : 'A'} $type has been reported in your area.',
+      'message':
+          message ??
+          '${type.toLowerCase() == 'robbery' ? 'An' : 'A'} $type has been reported in your area.',
       'community_id': communityId,
       'location': location,
       'reporter': userName ?? 'Anonymous',
@@ -61,15 +71,55 @@ class AlertProvider extends ChangeNotifier {
       communityId: user.communityId!,
       userId: user.id,
       userName: user.name,
-      context: context
+      context: context,
     );
   }
 
-  Future<void> verifyCommunityAlert(String reportedId) async {
-    // Implementation for verifying alert via service
+  Future<void> verifyCommunityAlert(
+    int reportedId,
+    int alertId,
+    BuildContext context, {
+    StateSetter? setModalState,
+  }) async {
+    isLoading = true;
+    if (setModalState != null) {
+      setModalState.call(() {});
+    }
+    notifyListeners();
+    final res = await _service.comfirmAlert(reportedId, alertId);
+    if (res.success) {
+      isLoading = false;
+      final alertIndex = alerts.indexWhere((alert) => alert.id == alertId);
+      if (alertIndex != -1) {
+        alerts[alertIndex].copyWith(isVerified: true);
+      }
+      showFeedBack(context, res.message);
+      if (setModalState != null) {
+        setModalState.call(() {});
+      }
+      notifyListeners();
+    } else {
+      isLoading = false;
+      if (setModalState != null) {
+        setModalState.call(() {});
+      }
+      showFeedBack(context, res.message, isError: true);
+      notifyListeners();
+    }
   }
 
-  Future<void> flagAlertAsFalse(String reportedId) async {
-    // Implementation for flagging alert via service
+  Future<void> flagAlertAsFalse(int alertId, BuildContext context) async {
+    isLoading = true;
+    notifyListeners();
+    final res = await _service.flagAsFalse(alertId);
+    if (res.success) {
+      isLoading = false;
+      //showFeedBack(context, res.message);
+      notifyListeners();
+    } else {
+      isLoading = false;
+      notifyListeners();
+      showFeedBack(context, res.message, isError: true);
+    }
   }
 }
