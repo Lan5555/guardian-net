@@ -23,6 +23,15 @@ class AlertModel {
     this.createdAt,
   });
 
+  bool get isEmpty => 
+    id == null && 
+    subject == null && 
+    title == null && 
+    message == null && 
+    location == null && 
+    createdAt == null;
+
+
   // Safe copying mechanism for modifying final fields
   AlertModel copyWith({
     int? id,

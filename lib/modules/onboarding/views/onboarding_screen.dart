@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:guardian_net/modules/auth/views/login.dart';
+import 'package:guardian_net/modules/notification/controller/notification_controller.dart';
 import 'package:guardian_net/modules/onboarding/controller/onboarding_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +18,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   late Onboardingcontroller controller;
-  
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +43,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _pageController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +72,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             builder: (context) => LoginScreen(),
                           ),
                         );
+                        await NotificationController.requestPermissions();
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.grey.withValues(alpha: .7),
@@ -155,7 +156,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             boxShadow: _currentPage == index
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF0A0E1A).withValues(alpha: .2),
+                                      color: const Color(
+                                        0xFF0A0E1A,
+                                      ).withValues(alpha: .2),
                                       blurRadius: 12,
                                       spreadRadius: 2,
                                     ),
@@ -187,7 +190,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF0A0E1A),
                               side: BorderSide(
-                                color: const Color(0xFF0A0E1A).withValues(alpha: .2),
+                                color: const Color(
+                                  0xFF0A0E1A,
+                                ).withValues(alpha: .2),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -219,12 +224,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 final pref =
                                     await SharedPreferences.getInstance();
                                 await pref.setString('has_viewed', 'true');
+                                await NotificationController.requestPermissions();
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => LoginScreen(),
                                   ),
                                 );
+                                
                               }
                             },
                             style: ElevatedButton.styleFrom(

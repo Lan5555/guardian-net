@@ -4,6 +4,7 @@ import 'package:guardian_net/modules/auth/controllers/auth_controller.dart';
 import 'package:guardian_net/modules/auth/views/forgot_password.dart';
 import 'package:guardian_net/modules/auth/views/register.dart';
 import 'package:guardian_net/modules/auth/views/admin_auth.dart';
+import 'package:guardian_net/modules/notification/controller/notification_controller.dart';
 import 'package:guardian_net/modules/onboarding/controller/onboarding_controller.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,7 +29,11 @@ class _LoginScreenState extends State<LoginScreen> {
     _onboardingcontroller.addListener(_onControllerChanged);
     _onboardingcontroller.pingServer();
     _authController.checkIfContainsCredentials();
+    requestPermission();
   }
+
+  Future<void> requestPermission() async =>
+      await NotificationController.requestPermissions();
 
   // Extracted listener method
   void _onControllerChanged() {

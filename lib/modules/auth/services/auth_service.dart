@@ -14,4 +14,7 @@ class AuthService extends CoreService {
   Future<NetResponse> fetchAllCommunities() async {
     return get('/community/find-all');
   }
+  Future<NetResponse> registerToken(dynamic payload) async {
+    return await send('/auth/register-token', payload);
+  }
 }

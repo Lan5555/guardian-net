@@ -1,18 +1,36 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:guardian_net/modules/notification/controller/notification_controller.dart';
 import 'package:guardian_net/modules/onboarding/views/onboarding_screen.dart';
 import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:guardian_net/providers/session_provider.dart';
 import 'package:guardian_net/providers/socket_provider.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-  ));
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await NotificationController.init();
+
+  // // ⭐ Get the token and register it with your server
+  // final token = await NotificationController.getToken();
+  // if (token != null) {
+  //   // await yourApi.registerFcmToken(token);
+  // }
+
+  // NotificationController.listenToTokenRefresh((newToken) async {
+  //   // await yourApi.registerFcmToken(newToken);
+  // });
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+  );
 
   runApp(
     MultiProvider(

@@ -34,16 +34,32 @@ class AlertProvider extends ChangeNotifier {
   }) async {
     isLoading = true;
     notifyListeners();
-    Position userCoordinates = context.read<SessionProvider>().userLocation!;
+
+    // ⭐ Null check instead of `!` — fixes the crash
+    final userCoordinates = context.read<SessionProvider>().userLocation;
+    if (userCoordinates == null) {
+      isLoading = false;
+      notifyListeners();
+      showFeedBack(
+        context,
+        'Location unavailable. Please enable GPS and try again.',
+        isError: true,
+      );
+      return;
+    }
+
     final location = await context.read<SessionProvider>().getLocationName(
       userCoordinates,
     );
+
+    // ⭐ Compute the fallback message once and reuse it
+    final resolvedMessage = message ??
+        '${type.toLowerCase() == 'robbery' ? 'An' : 'A'} $type has been reported in your area.';
+
     final data = {
       'subject': type,
       'title': '$type Alert',
-      'message':
-          message ??
-          '${type.toLowerCase() == 'robbery' ? 'An' : 'A'} $type has been reported in your area.',
+      'message': resolvedMessage,
       'community_id': communityId,
       'location': location,
       'reporter': userName ?? 'Anonymous',
@@ -51,17 +67,17 @@ class AlertProvider extends ChangeNotifier {
     };
 
     final res = await _service.sendAlert(data);
+    isLoading = false;
+
     if (res.success) {
-      isLoading = false;
-      await sendSmsToAll(message!, communityId, context);
-      notifyListeners();
+      // ⭐ Use the resolved message instead of `message!`
+      await sendSmsToAll(resolvedMessage, communityId, context);
     } else {
       if (kDebugMode) {
         print(res.message);
       }
-      isLoading = false;
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   Future<void> sendSmsToAll(
@@ -81,10 +97,22 @@ class AlertProvider extends ChangeNotifier {
   Future<void> triggerPanic(BuildContext context) async {
     final user = context.read<SessionProvider>().user;
     if (user == null) return;
+
+    // ⭐ Guard against null communityId
+    final communityId = user.communityId;
+    if (communityId == null) {
+      showFeedBack(
+        context,
+        'No community is assigned to your account.',
+        isError: true,
+      );
+      return;
+    }
+
     await sendNewUserAlert(
       'PANIC',
       message: 'PANIC Emergency has been reported in your area.',
-      communityId: user.communityId!,
+      communityId: communityId,
       userId: user.id,
       userName: user.name,
       context: context,
@@ -100,58 +128,81 @@ class AlertProvider extends ChangeNotifier {
   }) async {
     isLoading = true;
     final user = context.read<SessionProvider>().user;
+
+    // ⭐ Guard against null user / communityId
+    if (user == null || user.communityId == null) {
+      isLoading = false;
+      notifyListeners();
+      showFeedBack(
+        context,
+        'Session expired. Please log in again.',
+        isError: true,
+      );
+      return;
+    }
+
     if (setModalState != null) {
       setModalState.call(() {});
     }
     notifyListeners();
+
     final res = await _service.comfirmAlert(reportedId, alertId);
+    isLoading = false;
+
     if (res.success) {
-      isLoading = false;
       final alertIndex = alerts.indexWhere((alert) => alert.id == alertId);
       if (alertIndex != -1) {
-        alerts[alertIndex].copyWith(isVerified: true);
+        alerts[alertIndex] = alerts[alertIndex].copyWith(isVerified: true);
       }
       showFeedBack(context, res.message);
       await sendSmsToAll(
         'Emergency Alert successfully confirmed.',
-        user!.communityId!,
+        user.communityId!,
         context,
       );
       if (callback != null) {
         callback();
       }
-      if (setModalState != null) {
-        setModalState.call(() {});
-      }
-      notifyListeners();
     } else {
-      isLoading = false;
-      if (setModalState != null) {
-        setModalState.call(() {});
-      }
       showFeedBack(context, res.message, isError: true);
-      notifyListeners();
     }
+
+    if (setModalState != null) {
+      setModalState.call(() {});
+    }
+    notifyListeners();
   }
 
   Future<void> flagAlertAsFalse(int alertId, BuildContext context) async {
     isLoading = true;
     notifyListeners();
-    final res = await _service.flagAsFalse(alertId);
+
     final user = context.read<SessionProvider>().user;
-    if (res.success) {
+
+    // ⭐ Guard against null user / communityId
+    if (user == null || user.communityId == null) {
       isLoading = false;
-      //showFeedBack(context, res.message);
+      notifyListeners();
+      showFeedBack(
+        context,
+        'Session expired. Please log in again.',
+        isError: true,
+      );
+      return;
+    }
+
+    final res = await _service.flagAsFalse(alertId);
+    isLoading = false;
+
+    if (res.success) {
       await sendSmsToAll(
         'Emergency Alert flagged as false',
-        user!.communityId!,
+        user.communityId!,
         context,
       );
-      notifyListeners();
     } else {
-      isLoading = false;
-      notifyListeners();
       showFeedBack(context, res.message, isError: true);
     }
+    notifyListeners();
   }
 }

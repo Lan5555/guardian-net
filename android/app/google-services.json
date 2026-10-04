@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "804302455985",
+    "project_id": "guardian-net-alerts",
+    "storage_bucket": "guardian-net-alerts.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:804302455985:android:a9447a792ff379bd2fce90",
+        "android_client_info": {
+          "package_name": "com.example.guardian_net"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC04x-CuU_lmYBr9j-8_3oM8m5ikeePpxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

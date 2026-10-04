@@ -10,6 +10,7 @@ import 'package:guardian_net/models/community_model.dart';
 import 'package:guardian_net/models/user_model.dart';
 import 'package:guardian_net/modules/admin/views/admin_screen.dart';
 import 'package:guardian_net/modules/auth/services/auth_service.dart';
+import 'package:guardian_net/modules/notification/controller/notification_controller.dart';
 import 'package:guardian_net/providers/alert_provider.dart';
 import 'package:guardian_net/providers/session_provider.dart';
 import 'package:guardian_net/providers/socket_provider.dart';
@@ -59,6 +60,7 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     if (res.success) {
+      await registerFcmToken();
       showToast(context, "Admin Access Granted");
 
       Navigator.pushReplacement(
@@ -83,6 +85,7 @@ class AuthController extends ChangeNotifier {
 
     if (res.success) {
       showToast(context, res.message);
+      await registerFcmToken();
       user = UserModel.fromJson(res.data);
       context.read<SessionProvider>().setUser(user);
       context.read<SocketProvider>().connect(
@@ -153,7 +156,7 @@ class AuthController extends ChangeNotifier {
     NetResponse res = await _service.registerUser(payload);
     if (res.success) {
       user = UserModel.fromJson(res.data);
-
+      await registerFcmToken();
       context.read<SessionProvider>().setUser(user);
       context.read<SocketProvider>().connect(
         user!.communityId!,
@@ -184,6 +187,21 @@ class AuthController extends ChangeNotifier {
       showToast(context, res.message, isError: true);
       if (kDebugMode) {
         print(res.message);
+      }
+    }
+  }
+
+  Future<void> registerFcmToken() async {
+    final token = await NotificationController.getToken();
+    if (token != null) {
+      final payload = {'userId': user?.id, 'token': token};
+      final res = await _service.registerToken(payload);
+      if(res.success) {
+        if(kDebugMode) {
+          print(res.message);
+        }
+      } else {
+        showToast(context, res.message, isError: true);
       }
     }
   }
